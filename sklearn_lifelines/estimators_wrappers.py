@@ -28,7 +28,7 @@ class CoxPHFitterModel(BaseEstimator):
         return self
 
     def predict(self, X):
-        return self.estimator.predict_expectation(X)[0].values[0]
+        return self.estimator.predict_expectation(X)
 
 
 class AalenAdditiveFitterModel(BaseEstimator):
@@ -57,4 +57,4 @@ class AalenAdditiveFitterModel(BaseEstimator):
         return self
 
     def predict(self, X):
-        return self.estimator.predict_expectation(X)[0].values[0]
+        return self.estimator.predict_expectation(X)
