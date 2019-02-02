@@ -1,5 +1,6 @@
 from lifelines import AalenAdditiveFitter
 from lifelines import CoxPHFitter
+from lifelines import utils
 from sklearn.base import BaseEstimator
 
 class CoxPHFitterModel(BaseEstimator):
@@ -30,6 +31,14 @@ class CoxPHFitterModel(BaseEstimator):
     def predict(self, X):
         return self.estimator.predict_expectation(X)[0].values[0]
 
+    def score(self, X, y):
+        """Calculate score based on concordance index."""
+        partial_hazard = self.estimator.predict_partial_hazard(X)[0]
+        if self.event_col is None:
+            return utils.concordance_index(y[self.duration_column], -partial_hazard)
+        else:
+            return utils.concordance_index(y[self.duration_column], -partial_hazard, y[self.event_col])
+
 
 class AalenAdditiveFitterModel(BaseEstimator):
 
@@ -58,3 +67,11 @@ class AalenAdditiveFitterModel(BaseEstimator):
 
     def predict(self, X):
         return self.estimator.predict_expectation(X)[0].values[0]
+
+    def score(self, X, y):
+        """Calculate score based on concordance index."""
+        partial_hazard = self.estimator.predict_partial_hazard(X)[0]
+        if self.event_col is None:
+            return utils.concordance_index(y[self.duration_column], -partial_hazard)
+        else:
+            return utils.concordance_index(y[self.duration_column], -partial_hazard, y[self.event_col])

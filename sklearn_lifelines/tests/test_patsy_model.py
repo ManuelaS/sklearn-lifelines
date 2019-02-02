@@ -29,3 +29,10 @@ def test_coxph_model():
     exp_lifetime = coxph_surv_ppl.predict(data_test[0:1])
     assert (exp_lifetime > 4)
 
+    # Test that the result of the score() method matches the concordance index from the inner estimator
+    data_train_sorted = data_train.sort_values('duration') # Sort by duration for consistency with the implementation in CoxPHFitter
+    assert (coxph_surv_ppl.score(data_train_sorted, data_train_sorted) == coxph_surv_ppl.named_steps['coxphfittermodel'].estimator.score_)
+
+
+if __name__ == "__main__":
+    test_coxph_model()
