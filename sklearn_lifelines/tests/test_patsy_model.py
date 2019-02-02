@@ -26,8 +26,8 @@ def test_coxph_model():
     coxph_surv_ppl.fit(data_train, y=data_train)
 
     #use pipeline to predict expected lifetime
-    exp_lifetime = coxph_surv_ppl.predict(data_test[0:1])
-    assert (exp_lifetime > 4)
+    exp_lifetime = coxph_surv_ppl.predict(data_test)
+    assert (exp_lifetime.iloc[0,0] > 4)
 
     # Test that the result of the score() method matches the concordance index from the inner estimator
     data_train_sorted = data_train.sort_values('duration') # Sort by duration for consistency with the implementation in CoxPHFitter
