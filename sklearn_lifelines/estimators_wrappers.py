@@ -4,7 +4,7 @@ from lifelines import utils
 from sklearn.base import BaseEstimator
 
 class CoxPHFitterModel(BaseEstimator):
-    def __init__(self, duration_column=None, event_col=None, initial_beta=None, strata=None, alpha=0.95, tie_method='Efron', penalizer=0.0, **kwargs):
+    def __init__(self, duration_column=None, event_col=None, initial_point=None, strata=None, alpha=0.95, tie_method='Efron', penalizer=0.0, **kwargs):
         self.alpha = alpha
         self.tie_method = tie_method
         self.penalizer = penalizer
@@ -12,7 +12,7 @@ class CoxPHFitterModel(BaseEstimator):
         self.duration_column = duration_column
         self.event_col = event_col
 
-        self.initial_beta = initial_beta
+        self.initial_point = initial_point
         self.strata = strata
 
 
@@ -24,7 +24,7 @@ class CoxPHFitterModel(BaseEstimator):
 
         est = CoxPHFitter(alpha=self.alpha, tie_method=self.tie_method, penalizer=self.penalizer)
 
-        est.fit(X_, duration_col=self.duration_column, event_col=self.event_col, initial_beta=self.initial_beta, strata=self.strata, **fit_params)
+        est.fit(X_, duration_col=self.duration_column, event_col=self.event_col, initial_point=self.initial_point, strata=self.strata, **fit_params)
         self.estimator = est
         return self
 
@@ -42,7 +42,7 @@ class CoxPHFitterModel(BaseEstimator):
 
 class AalenAdditiveFitterModel(BaseEstimator):
 
-    def __init__(self, duration_column=None, event_col=None, timeline=None, id_col=None, fit_intercept=True, alpha=0.95, coef_penalizer=0.5, smoothing_penalizer=0.0,**kwargs):
+    def __init__(self, duration_column=None, event_col=None, weights_col=None, show_progress=None, fit_intercept=True, alpha=0.95, coef_penalizer=0.5, smoothing_penalizer=0.0,**kwargs):
         self.fit_intercept=fit_intercept
         self.alpha=alpha
         self.coef_penalizer=coef_penalizer
@@ -50,8 +50,8 @@ class AalenAdditiveFitterModel(BaseEstimator):
 
         self.duration_column = duration_column
         self.event_col = event_col
-        self.timeline = timeline
-        self.id_col = id_col
+        self.weights_col = weights_col
+        self.show_progress = show_progress
 
     def fit(self, X, y, **fit_params):
         X_ = X.copy()
@@ -60,8 +60,9 @@ class AalenAdditiveFitterModel(BaseEstimator):
             X_[self.event_col] = y[self.event_col]
 
         est = AalenAdditiveFitter(fit_intercept=self.fit_intercept, alpha=self.alpha, coef_penalizer=self.coef_penalizer,
-                smoothing_penalizer=self.smoothing_penalizer)
-        est.fit(X_, duration_col=self.duration_column, event_col=self.event_col, timeline=self.timeline, id_col = self.id_col, **fit_params)
+                                  smoothing_penalizer=self.smoothing_penalizer)
+        est.fit(X_, duration_col=self.duration_column, event_col=self.event_col, weights_col=self.weights_col,
+                show_progress=self.show_progress, **fit_params)
         self.estimator = est
         return self
 
@@ -70,8 +71,8 @@ class AalenAdditiveFitterModel(BaseEstimator):
 
     def score(self, X, y):
         """Calculate score based on concordance index."""
-        partial_hazard = self.estimator.predict_partial_hazard(X)[0]
+        predicted_hazards = self.estimator.predict_cumulative_hazard(X).iloc[-1]
         if self.event_col is None:
-            return utils.concordance_index(y[self.duration_column], -partial_hazard)
+            return utils.concordance_index(y[self.duration_column], -predicted_hazards)
         else:
-            return utils.concordance_index(y[self.duration_column], -partial_hazard, y[self.event_col])
+            return utils.concordance_index(y[self.duration_column], -predicted_hazards, y[self.event_col])
