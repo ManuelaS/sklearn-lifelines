@@ -4,7 +4,7 @@ from lifelines import utils
 from sklearn.base import BaseEstimator
 
 class CoxPHFitterModel(BaseEstimator):
-    def __init__(self, duration_column=None, event_col=None, initial_point=None, strata=None, alpha=0.95, tie_method='Efron', penalizer=0.0, **kwargs):
+    def __init__(self, duration_column=None, event_col=None, initial_point=None, strata=None, alpha=0.05, tie_method='Efron', penalizer=0.0, **kwargs):
         self.alpha = alpha
         self.tie_method = tie_method
         self.penalizer = penalizer
@@ -42,7 +42,7 @@ class CoxPHFitterModel(BaseEstimator):
 
 class AalenAdditiveFitterModel(BaseEstimator):
 
-    def __init__(self, duration_column=None, event_col=None, weights_col=None, show_progress=None, fit_intercept=True, alpha=0.95, coef_penalizer=0.5, smoothing_penalizer=0.0,**kwargs):
+    def __init__(self, duration_column=None, event_col=None, weights_col=None, show_progress=None, fit_intercept=True, alpha=0.05, coef_penalizer=0.5, smoothing_penalizer=0.0,**kwargs):
         self.fit_intercept=fit_intercept
         self.alpha=alpha
         self.coef_penalizer=coef_penalizer
